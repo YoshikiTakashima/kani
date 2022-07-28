@@ -223,7 +223,7 @@ pub(crate) fn cargokani_assess_main(mut ctx: KaniSession) -> Result<()> {
         ctx.args.jobs = Some(None); // -j, num_cpu
     }
 
-    let outputs = ctx.cargo_build()?;
+    let outputs = ctx.cargo_build(None)?;
     let metadata = ctx.collect_kani_metadata(&outputs.metadata)?;
 
     let crate_count = outputs.metadata.len();

@@ -55,7 +55,7 @@ fn cargokani_main(input_args: Vec<OsString>) -> Result<()> {
         return assess::cargokani_assess_main(ctx);
     }
 
-    let outputs = ctx.cargo_build()?;
+    let outputs = ctx.cargo_build(args.manifest_path)?;
 
     let mut goto_objs: Vec<PathBuf> = Vec::new();
     for symtab in &outputs.symtabs {

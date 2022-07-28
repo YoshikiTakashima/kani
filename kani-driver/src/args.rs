@@ -40,6 +40,10 @@ pub struct CargoKaniArgs {
 
     #[structopt(flatten)]
     pub common_opts: KaniArgs,
+
+    /// Path to Cargo.toml
+    #[structopt(long, parse(from_os_str))]
+    pub manifest_path: Option<PathBuf>,
 }
 
 // cargo-kani takes optional subcommands to request specialized behavior

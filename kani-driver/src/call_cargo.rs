@@ -25,7 +25,7 @@ pub struct CargoOutputs {
 
 impl KaniSession {
     /// Calls `cargo_build` to generate `*.symtab.json` files in `target_dir`
-    pub fn cargo_build(&self) -> Result<CargoOutputs> {
+    pub fn cargo_build(&self, maybe_manifest_path: Option<PathBuf>) -> Result<CargoOutputs> {
         let build_target = env!("TARGET"); // see build.rs
         let metadata = MetadataCommand::new().exec().context("Failed to get cargo metadata.")?;
         let target_dir = self
@@ -66,6 +66,10 @@ impl KaniSession {
 
         if self.args.verbose {
             cargo_args.push("-v".into());
+        }
+        if let Some(manifest_path) = maybe_manifest_path {
+            cargo_args.push("--manifest-path".into());
+            cargo_args.push(manifest_path.into());
         }
 
         // Arguments that will only be passed to the target package.
