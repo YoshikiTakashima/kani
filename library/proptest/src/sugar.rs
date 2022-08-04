@@ -6,8 +6,11 @@
 // <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
+
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+//
 // Modifications Copyright Kani Contributors
-// See GitHub history for details
+// See GitHub history for details.
 
 // use crate::std_facade::fmt;
 
@@ -949,43 +952,32 @@ macro_rules! proptest_helper {
     };
     // build a property testing block that when executed, executes the full property test.
     (@_BODY $config:ident ($($parm:pat in $strategy:expr),+) [$($mod:tt)*] $body:expr) => {{
-        $config.source_file = Some(file!());
-        let mut runner = $crate::test_runner::TestRunner::new($config);
-        let names = $crate::proptest_helper!(@_WRAPSTR ($($parm),*));
-        match runner.run(
-            &$crate::strategy::Strategy::prop_map(
-                $crate::proptest_helper!(@_WRAP ($($strategy)*)),
-                |values| $crate::sugar::NamedArguments(names, values)),
-            $($mod)* |$crate::sugar::NamedArguments(
-                _, $crate::proptest_helper!(@_WRAPPAT ($($parm),*)))|
-            {
-                let _: () = $body;
-                Ok(())
-            })
-        {
-            Ok(_) => (),
-            Err(e) => panic!("{}\n{}", e, runner),
-        }
-    }};
-    // build a property testing block that when executed, executes the full property test.
-    (@_BODY2 $config:ident ($($arg:tt)+) [$($mod:tt)*] $body:expr) => {{
         // $config.source_file = Some(file!());
-        // let mut runner2 = $crate::test_runner::TestRunner::new($config);
-        // let names2 = $crate::proptest_helper!(@_EXT _STR ($($arg)*));
-        // match runner2.run(
+        // let mut runner = $crate::test_runner::TestRunner::new($config);
+        // let names = $crate::proptest_helper!(@_WRAPSTR ($($parm),*));
+        // match runner.run(
         //     &$crate::strategy::Strategy::prop_map(
-        //         $crate::proptest_helper!(@_EXT _STRAT ($($arg)*)),
-        //         |values| $crate::sugar::NamedArguments(names2, values)),
+        //         $crate::proptest_helper!(@_WRAP ($($strategy)*)),
+        //         |values| $crate::sugar::NamedArguments(names, values)),
         //     $($mod)* |$crate::sugar::NamedArguments(
-        //         _, $crate::proptest_helper!(@_EXT _PAT ($($arg)*)))|
+        //         _, $crate::proptest_helper!(@_WRAPPAT ($($parm),*)))|
         //     {
         //         let _: () = $body;
         //         Ok(())
         //     })
         // {
         //     Ok(_) => (),
-        //     Err(e) => panic!("{}\n{}", e, runner2),
+        //     Err(e) => panic!("{}BODY\n{}", e, runner),
         // }
+        $crate::test_runner::TestRunner::run_kani(
+            $crate::proptest_helper!(@_WRAP ($($strategy)*)),
+            |$crate::proptest_helper!(@_WRAPPAT ($($parm),*))| {
+                $body
+            }
+        );
+    }};
+    // build a property testing block that when executed, executes the full property test.
+    (@_BODY2 $config:ident ($($arg:tt)+) [$($mod:tt)*] $body:expr) => {{
         $crate::test_runner::TestRunner::run_kani(
             $crate::proptest_helper!(@_EXT _STRAT ($($arg)*)),
             |$crate::proptest_helper!(@_EXT _PAT ($($arg)*))| {
@@ -1060,62 +1052,3 @@ macro_rules! proptest_helper {
         ($crate::proptest_helper!(@$cmd [$s] [[$($p)*]]), $crate::proptest_helper!(@_EXT $cmd ($($r)*)))
     };
 }
-
-// macro_rules! named_arguments_tuple {
-//     ($($ix:tt $argn:ident $argv:ident)*) => {
-//         impl<'a, $($argn : Copy),*, $($argv),*> fmt::Debug
-//         for NamedArguments<($($argn,)*),&'a ($($argv,)*)>
-//         where $(NamedArguments<$argn, &'a $argv> : fmt::Debug),*,
-//               $($argv : 'a),*
-//         {
-//             #[allow(unused_assignments)]
-//             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//                 let mut first = true;
-//                 $(
-//                     if !first {
-//                         write!(f, ", ")?;
-//                     }
-//                     first = false;
-//                     fmt::Debug::fmt(
-//                         &NamedArguments((self.0).$ix, &(self.1).$ix), f)?;
-//                 )*
-//                 Ok(())
-//             }
-//         }
-
-//         impl<$($argn : Copy),*, $($argv),*> fmt::Debug
-//         for NamedArguments<($($argn,)*), ($($argv,)*)>
-//         where $(for<'a> NamedArguments<$argn, &'a $argv> : fmt::Debug),*
-//         {
-//             #[allow(unused_assignments)]
-//             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//                 let mut first = true;
-//                 $(
-//                     if !first {
-//                         write!(f, ", ")?;
-//                     }
-//                     first = false;
-//                     fmt::Debug::fmt(
-//                         &NamedArguments((self.0).$ix, &(self.1).$ix), f)?;
-//                 )*
-//                 Ok(())
-//             }
-//         }
-//     }
-// }
-
-// named_arguments_tuple!(0 AN AV);
-// named_arguments_tuple!(0 AN AV 1 BN BV);
-// named_arguments_tuple!(0 AN AV 1 BN BV 2 CN CV);
-// named_arguments_tuple!(0 AN AV 1 BN BV 2 CN CV 3 DN DV);
-// named_arguments_tuple!(0 AN AV 1 BN BV 2 CN CV 3 DN DV 4 EN EV);
-// named_arguments_tuple!(0 AN AV 1 BN BV 2 CN CV 3 DN DV 4 EN EV
-//                        5 FN FV);
-// named_arguments_tuple!(0 AN AV 1 BN BV 2 CN CV 3 DN DV 4 EN EV
-//                        5 FN FV 6 GN GV);
-// named_arguments_tuple!(0 AN AV 1 BN BV 2 CN CV 3 DN DV 4 EN EV
-//                        5 FN FV 6 GN GV 7 HN HV);
-// named_arguments_tuple!(0 AN AV 1 BN BV 2 CN CV 3 DN DV 4 EN EV
-//                        5 FN FV 6 GN GV 7 HN HV 8 IN IV);
-// named_arguments_tuple!(0 AN AV 1 BN BV 2 CN CV 3 DN DV 4 EN EV
-//                        5 FN FV 6 GN GV 7 HN HV 8 IN IV 9 JN JV);

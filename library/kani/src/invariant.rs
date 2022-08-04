@@ -45,6 +45,3 @@ where
         value
     }
 }
-
-
-
