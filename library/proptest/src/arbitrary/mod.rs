@@ -34,7 +34,7 @@ mod macros;
 // mod arrays;
 mod primitives;
 // mod sample;
-// mod tuples;
+mod tuples;
 
 // mod _core;
 
