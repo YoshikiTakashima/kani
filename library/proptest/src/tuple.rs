@@ -6,8 +6,11 @@
 // <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
+
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+//
 // Modifications Copyright Kani Contributors
-// See GitHub history for details
+// See GitHub history for details.
 
 //! Support for combining strategies into tuples.
 //!
@@ -76,56 +79,3 @@ tuple!(0: A, 1: B, 2: C, 3: D, 4: E, 5: F, 6: G, 7: H, 8: I);
 tuple!(0: A, 1: B, 2: C, 3: D, 4: E, 5: F, 6: G, 7: H, 8: I, 9: J);
 tuple!(0: A, 1: B, 2: C, 3: D, 4: E, 5: F, 6: G, 7: H, 8: I, 9: J, 10: K);
 tuple!(0: A, 1: B, 2: C, 3: D, 4: E, 5: F, 6: G, 7: H, 8: I, 9: J, 10: K, 11: L);
-
-#[cfg(test)]
-mod test {
-    use crate::strategy::*;
-
-    use super::*;
-
-    #[test]
-    fn shrinks_fully_ltr() {
-        fn pass(a: (i32, i32)) -> bool {
-            a.0 * a.1 <= 9
-        }
-
-        let input = (0..32, 0..32);
-        let mut runner = TestRunner::default();
-
-        let mut cases_tested = 0;
-        for _ in 0..256 {
-            // Find a failing test case
-            let mut case = input.new_tree(&mut runner).unwrap();
-            if pass(case.current()) {
-                continue;
-            }
-
-            loop {
-                if pass(case.current()) {
-                    if !case.complicate() {
-                        break;
-                    }
-                } else {
-                    if !case.simplify() {
-                        break;
-                    }
-                }
-            }
-
-            let last = case.current();
-            assert!(!pass(last));
-            // Maximally shrunken
-            assert!(pass((last.0 - 1, last.1)));
-            assert!(pass((last.0, last.1 - 1)));
-
-            cases_tested += 1;
-        }
-
-        assert!(cases_tested > 32, "Didn't find enough test cases");
-    }
-
-    #[test]
-    fn test_sanity() {
-        check_strategy_sanity((0i32..100, 0i32..1000, 0i32..10000), None);
-    }
-}
