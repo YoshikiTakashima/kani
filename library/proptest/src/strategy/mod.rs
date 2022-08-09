@@ -18,11 +18,11 @@
 
 // mod filter;
 // mod filter_map;
-// mod flatten;
-// mod fuse;
+mod flatten;
+mod fuse;
 mod just;
 // mod lazy;
-// mod map;
+mod map;
 // mod recursive;
 // mod shuffle;
 mod traits;
@@ -30,12 +30,12 @@ mod traits;
 
 // pub use self::filter::*;
 // pub use self::filter_map::*;
-// pub use self::flatten::*;
-// pub use self::fuse::*;
+pub use self::flatten::*;
+pub use self::fuse::*;
 pub use self::just::*;
 // pub use self::lazy::*;
 // pub use self::lazy::*;
-// pub use self::map::*;
+pub use self::map::*;
 // pub use self::recursive::*;
 // pub use self::shuffle::*;
 pub use self::traits::*;

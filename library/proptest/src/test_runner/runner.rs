@@ -20,6 +20,7 @@ use crate::strategy::{Strategy, ValueTree};
 use crate::test_runner::Config;
 
 /// Fake test runner that keeps no state.
+#[derive(Clone)]
 pub struct TestRunner {}
 
 impl TestRunner {
@@ -39,4 +40,13 @@ impl TestRunner {
         let tree = strategy.new_tree(&mut runner).unwrap();
         test_fn(tree.current());
     }
+}
+
+impl TestRunner {
+    /// Create a fresh `TestRunner` with the same config and global counters as
+    /// this one.
+    pub(crate) fn partial_clone(&mut self) -> Self {
+        self.clone()
+    }
+
 }

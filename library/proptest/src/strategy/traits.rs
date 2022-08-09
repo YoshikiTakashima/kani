@@ -19,7 +19,7 @@ use crate::std_facade::{fmt, Arc, Box, Rc};
 
 use core::cmp;
 
-// use crate::strategy::*;
+use crate::strategy::*;
 use crate::test_runner::*;
 
 //==============================================================================
@@ -70,24 +70,24 @@ pub trait Strategy: fmt::Debug {
 
     // TODO: Implement more complex strategy compositions.
 
-    // /// Returns a strategy which produces values transformed by the function
-    // /// `fun`.
-    // ///
-    // /// There is no need (or possibility, for that matter) to define how the
-    // /// output is to be shrunken. Shrinking continues to take place in terms of
-    // /// the source value.
-    // ///
-    // /// `fun` should be a deterministic function. That is, for a given input
-    // /// value, it should produce an equivalent output value on every call.
-    // /// Proptest assumes that it can call the function as many times as needed
-    // /// to generate as many identical values as needed. For this reason, `F` is
-    // /// `Fn` rather than `FnMut`.
-    // fn prop_map<O: fmt::Debug, F: Fn(Self::Value) -> O>(self, fun: F) -> Map<Self, F>
-    // where
-    //     Self: Sized,
-    // {
-    //     Map { source: self, fun: Arc::new(fun) }
-    // }
+    /// Returns a strategy which produces values transformed by the function
+    /// `fun`.
+    ///
+    /// There is no need (or possibility, for that matter) to define how the
+    /// output is to be shrunken. Shrinking continues to take place in terms of
+    /// the source value.
+    ///
+    /// `fun` should be a deterministic function. That is, for a given input
+    /// value, it should produce an equivalent output value on every call.
+    /// Proptest assumes that it can call the function as many times as needed
+    /// to generate as many identical values as needed. For this reason, `F` is
+    /// `Fn` rather than `FnMut`.
+    fn prop_map<O: fmt::Debug, F: Fn(Self::Value) -> O>(self, fun: F) -> Map<Self, F>
+    where
+        Self: Sized,
+    {
+        Map { source: self, fun: Arc::new(fun) }
+    }
 
     // /// Returns a strategy which produces values of type `O` by transforming
     // /// `Self` with `Into<O>`.
@@ -149,100 +149,100 @@ pub trait Strategy: fmt::Debug {
     //     Perturb { source: self, fun: Arc::new(fun) }
     // }
 
-    // /// Maps values produced by this strategy into new strategies and picks
-    // /// values from those strategies.
-    // ///
-    // /// `fun` is used to transform the values produced by this strategy into
-    // /// other strategies. Values are then chosen from the derived strategies.
-    // /// Shrinking proceeds by shrinking individual values as well as shrinking
-    // /// the input used to generate the internal strategies.
-    // ///
-    // /// ## Shrinking
-    // ///
-    // /// In the case of test failure, shrinking will not only shrink the output
-    // /// from the combinator itself, but also the input, i.e., the strategy used
-    // /// to generate the output itself. Doing this requires searching the new
-    // /// derived strategy for a new failing input. The combinator will generate
-    // /// up to `Config::cases` values for this search.
-    // ///
-    // /// As a result, nested `prop_flat_map`/`Flatten` combinators risk
-    // /// exponential run time on this search for new failing values. To ensure
-    // /// that test failures occur within a reasonable amount of time, all of
-    // /// these combinators share a single "flat map regen" counter, and will
-    // /// stop generating new values if it exceeds `Config::max_flat_map_regens`.
-    // ///
-    // /// ## Example
-    // ///
-    // /// Generate two integers, where the second is always less than the first,
-    // /// without using filtering:
-    // ///
-    // /// ```
-    // /// use proptest::prelude::*;
-    // ///
-    // /// proptest! {
-    // ///   # /*
-    // ///   #[test]
-    // ///   # */
-    // ///   fn test_two(
-    // ///     // Pick integers in the 1..65536 range, and derive a strategy
-    // ///     // which emits a tuple of that integer and another one which is
-    // ///     // some value less than it.
-    // ///     (a, b) in (1..65536).prop_flat_map(|a| (Just(a), 0..a))
-    // ///   ) {
-    // ///     prop_assert!(b < a);
-    // ///   }
-    // /// }
-    // /// #
-    // /// # fn main() { test_two(); }
-    // /// ```
-    // ///
-    // /// ## Choosing the right flat-map
-    // ///
-    // /// `Strategy` has three "flat-map" combinators. They look very similar at
-    // /// first, and can be used to produce superficially identical test results.
-    // /// For example, the following three expressions all produce inputs which
-    // /// are 2-tuples `(a,b)` where the `b` component is less than `a`.
-    // ///
-    // /// ```no_run
-    // /// # #![allow(unused_variables)]
-    // /// use proptest::prelude::*;
-    // ///
-    // /// let flat_map = (1..10).prop_flat_map(|a| (Just(a), 0..a));
-    // /// let ind_flat_map = (1..10).prop_ind_flat_map(|a| (Just(a), 0..a));
-    // /// let ind_flat_map2 = (1..10).prop_ind_flat_map2(|a| 0..a);
-    // /// ```
-    // ///
-    // /// The three do differ however in terms of how they shrink.
-    // ///
-    // /// For `flat_map`, both `a` and `b` will shrink, and the invariant that
-    // /// `b < a` is maintained. This is a "dependent" or "higher-order" strategy
-    // /// in that it remembers that the strategy for choosing `b` is dependent on
-    // /// the value chosen for `a`.
-    // ///
-    // /// For `ind_flat_map`, the invariant `b < a` is maintained, but only
-    // /// because `a` does not shrink. This is due to the fact that the
-    // /// dependency between the strategies is not tracked; `a` is simply seen as
-    // /// a constant.
-    // ///
-    // /// Finally, for `ind_flat_map2`, the invariant `b < a` is _not_
-    // /// maintained, because `a` can shrink independently of `b`, again because
-    // /// the dependency between the two variables is not tracked, but in this
-    // /// case the derivation of `a` is still exposed to the shrinking system.
-    // ///
-    // /// The use-cases for the independent flat-map variants is pretty narrow.
-    // /// For the majority of cases where invariants need to be maintained and
-    // /// you want all components to shrink, `prop_flat_map` is the way to go.
-    // /// `prop_ind_flat_map` makes the most sense when the input to the map
-    // /// function is not exposed in the output and shrinking across strategies
-    // /// is not expected to be useful. `prop_ind_flat_map2` is useful for using
-    // /// related values as starting points while not constraining them to that
-    // /// relation.
-    // fn prop_flat_map<S: Strategy, F: Fn(Self::Value) -> S>(self, fun: F) -> Flatten<Map<Self, F>>
-    // where
-    //     Self: Sized,
-    // {
-    //     Flatten::new(Map { source: self, fun: Arc::new(fun) })
-    // }
+    /// Maps values produced by this strategy into new strategies and picks
+    /// values from those strategies.
+    ///
+    /// `fun` is used to transform the values produced by this strategy into
+    /// other strategies. Values are then chosen from the derived strategies.
+    /// Shrinking proceeds by shrinking individual values as well as shrinking
+    /// the input used to generate the internal strategies.
+    ///
+    /// ## Shrinking
+    ///
+    /// In the case of test failure, shrinking will not only shrink the output
+    /// from the combinator itself, but also the input, i.e., the strategy used
+    /// to generate the output itself. Doing this requires searching the new
+    /// derived strategy for a new failing input. The combinator will generate
+    /// up to `Config::cases` values for this search.
+    ///
+    /// As a result, nested `prop_flat_map`/`Flatten` combinators risk
+    /// exponential run time on this search for new failing values. To ensure
+    /// that test failures occur within a reasonable amount of time, all of
+    /// these combinators share a single "flat map regen" counter, and will
+    /// stop generating new values if it exceeds `Config::max_flat_map_regens`.
+    ///
+    /// ## Example
+    ///
+    /// Generate two integers, where the second is always less than the first,
+    /// without using filtering:
+    ///
+    /// ```
+    /// use proptest::prelude::*;
+    ///
+    /// proptest! {
+    ///   # /*
+    ///   #[test]
+    ///   # */
+    ///   fn test_two(
+    ///     // Pick integers in the 1..65536 range, and derive a strategy
+    ///     // which emits a tuple of that integer and another one which is
+    ///     // some value less than it.
+    ///     (a, b) in (1..65536).prop_flat_map(|a| (Just(a), 0..a))
+    ///   ) {
+    ///     prop_assert!(b < a);
+    ///   }
+    /// }
+    /// #
+    /// # fn main() { test_two(); }
+    /// ```
+    ///
+    /// ## Choosing the right flat-map
+    ///
+    /// `Strategy` has three "flat-map" combinators. They look very similar at
+    /// first, and can be used to produce superficially identical test results.
+    /// For example, the following three expressions all produce inputs which
+    /// are 2-tuples `(a,b)` where the `b` component is less than `a`.
+    ///
+    /// ```no_run
+    /// # #![allow(unused_variables)]
+    /// use proptest::prelude::*;
+    ///
+    /// let flat_map = (1..10).prop_flat_map(|a| (Just(a), 0..a));
+    /// let ind_flat_map = (1..10).prop_ind_flat_map(|a| (Just(a), 0..a));
+    /// let ind_flat_map2 = (1..10).prop_ind_flat_map2(|a| 0..a);
+    /// ```
+    ///
+    /// The three do differ however in terms of how they shrink.
+    ///
+    /// For `flat_map`, both `a` and `b` will shrink, and the invariant that
+    /// `b < a` is maintained. This is a "dependent" or "higher-order" strategy
+    /// in that it remembers that the strategy for choosing `b` is dependent on
+    /// the value chosen for `a`.
+    ///
+    /// For `ind_flat_map`, the invariant `b < a` is maintained, but only
+    /// because `a` does not shrink. This is due to the fact that the
+    /// dependency between the strategies is not tracked; `a` is simply seen as
+    /// a constant.
+    ///
+    /// Finally, for `ind_flat_map2`, the invariant `b < a` is _not_
+    /// maintained, because `a` can shrink independently of `b`, again because
+    /// the dependency between the two variables is not tracked, but in this
+    /// case the derivation of `a` is still exposed to the shrinking system.
+    ///
+    /// The use-cases for the independent flat-map variants is pretty narrow.
+    /// For the majority of cases where invariants need to be maintained and
+    /// you want all components to shrink, `prop_flat_map` is the way to go.
+    /// `prop_ind_flat_map` makes the most sense when the input to the map
+    /// function is not exposed in the output and shrinking across strategies
+    /// is not expected to be useful. `prop_ind_flat_map2` is useful for using
+    /// related values as starting points while not constraining them to that
+    /// relation.
+    fn prop_flat_map<S: Strategy, F: Fn(Self::Value) -> S>(self, fun: F) -> Flatten<Map<Self, F>>
+    where
+        Self: Sized,
+    {
+        Flatten::new(Map { source: self, fun: Arc::new(fun) })
+    }
 
     // /// Maps values produced by this strategy into new strategies and picks
     // /// values from those strategies while considering the new strategies to be
