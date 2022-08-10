@@ -16,9 +16,11 @@
 //! original.
 
 mod config;
+mod errors;
 mod reason;
 mod runner;
 
 pub use config::*;
+pub use errors::*;
 pub use reason::*;
 pub use runner::*;
