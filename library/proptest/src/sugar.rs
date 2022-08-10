@@ -271,13 +271,7 @@ macro_rules! prop_assume {
     };
 
     ($expr:expr, $fmt:tt $(, $fmt_arg:expr),* $(,)?) => {
-        if !$expr {
-            return ::core::result::Result::Err(
-                $crate::test_runner::TestCaseError::reject(
-                    format!(concat!("{}:{}:{}: ", $fmt),
-                            file!(), line!(), column!()
-                            $(, $fmt_arg)*)));
-        }
+        kani::assume($expr)
     };
 }
 
@@ -741,12 +735,7 @@ macro_rules! prop_assert {
     };
 
     ($cond:expr, $($fmt:tt)*) => {
-        if !$cond {
-            let message = format!($($fmt)*);
-            let message = format!("{} at {}:{}", message, file!(), line!());
-            return ::core::result::Result::Err(
-                $crate::test_runner::TestCaseError::fail(message));
-        }
+        assert!($cond, $($fmt:tt)*)
     };
 }
 
