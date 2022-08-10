@@ -961,7 +961,10 @@ macro_rules! proptest_helper {
         $crate::test_runner::TestRunner::run_kani(
             $crate::proptest_helper!(@_WRAP ($($strategy)*)),
             |$crate::proptest_helper!(@_WRAPPAT ($($parm),*))| {
-                $body
+                {
+                    $body
+                }
+                Ok(())
             }
         );
     }};
@@ -970,7 +973,10 @@ macro_rules! proptest_helper {
         $crate::test_runner::TestRunner::run_kani(
             $crate::proptest_helper!(@_EXT _STRAT ($($arg)*)),
             |$crate::proptest_helper!(@_EXT _PAT ($($arg)*))| {
-                $body
+                {
+                    $body
+                }
+                Ok(())
             }
         );
     }};
