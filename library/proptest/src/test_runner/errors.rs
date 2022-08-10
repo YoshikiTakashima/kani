@@ -95,11 +95,9 @@ impl<T: fmt::Debug> fmt::Display for TestError<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             TestError::Abort(ref why) => write!(f, "Test aborted: {}", why),
-            TestError::Fail(ref why, ref what) => write!(
-                f,
-                "Test failed: {}; minimal failing input: {:?}",
-                why, what
-            ),
+            TestError::Fail(ref why, ref what) => {
+                write!(f, "Test failed: {}; minimal failing input: {:?}", why, what)
+            }
         }
     }
 }

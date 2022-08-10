@@ -48,5 +48,4 @@ impl TestRunner {
     pub(crate) fn partial_clone(&mut self) -> Self {
         self.clone()
     }
-
 }
