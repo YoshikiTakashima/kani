@@ -93,7 +93,8 @@ pub mod arbitrary;
 // pub mod bits;
 pub mod bool;
 // pub mod char;
-// pub mod collection;
+/// empty collection stubbed
+pub mod collection {}
 pub mod num;
 pub mod strategy;
 pub mod test_runner;

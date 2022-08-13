@@ -43,7 +43,7 @@ pub mod prop {
     // pub use crate::bits;
     pub use crate::bool;
     // pub use crate::char;
-    // pub use crate::collection;
+    pub use crate::collection;
     pub use crate::num;
     // pub use crate::option;
     // pub use crate::result;
