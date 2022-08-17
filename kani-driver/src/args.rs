@@ -43,6 +43,18 @@ pub struct KaniArgs {
     /// Generate visualizer report to <target-dir>/report/html/index.html
     #[structopt(long)]
     pub visualize: bool,
+    /// Generate executable trace test case and print it to stdout.
+    /// This option does not work with `--output-format old`.
+    #[structopt(
+        long,
+        requires("enable-unstable"),
+        requires("harness"),
+        conflicts_with_all(&["visualize", "dry-run"]),
+    )]
+    pub gen_exe_trace: bool,
+    /// Additionally add executable trace test case to the source code
+    #[structopt(long, requires("gen-exe-trace"))]
+    pub add_exe_trace_to_src: bool,
     /// Keep temporary files generated throughout Kani process
     #[structopt(long, hidden_short_help(true))]
     pub keep_temps: bool,
@@ -102,6 +114,9 @@ pub struct KaniArgs {
     /// Kani will only compile the crate. No verification will be performed
     #[structopt(long, hidden_short_help(true))]
     pub only_codegen: bool,
+    /// Run Kani on all packages in the workspace.
+    #[structopt(long)]
+    pub workspace: bool,
 
     /// Specify the value used for loop unwinding in CBMC
     #[structopt(long)]
@@ -154,6 +169,10 @@ pub struct KaniArgs {
     /// Execute CBMC's sanity checks to ensure the goto-program we generate is correct.
     #[structopt(long, hidden_short_help(true), requires("enable-unstable"))]
     pub run_sanity_checks: bool,
+
+    /// Disable CBMC's slice formula which prevents values from being assigned to redundant variables in traces.
+    #[structopt(long, hidden_short_help(true), requires("enable-unstable"))]
+    pub no_slice_formula: bool,
     /*
     The below is a "TODO list" of things not yet implemented from the kani_flags.py script.
 
@@ -411,5 +430,10 @@ mod tests {
     #[test]
     fn check_restrict_cbmc_args() {
         check_unstable_flag("--cbmc-args --json-ui")
+    }
+
+    #[test]
+    fn check_disable_slicing_unstable() {
+        check_unstable_flag("--no-slice-formula")
     }
 }

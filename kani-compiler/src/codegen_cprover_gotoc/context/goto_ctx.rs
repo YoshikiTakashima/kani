@@ -23,9 +23,9 @@ use cbmc::InternedString;
 use cbmc::{MachineModel, RoundingMode};
 use kani_metadata::HarnessMetadata;
 use kani_queries::{QueryDb, UserInput};
+use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::owning_ref::OwningRef;
 use rustc_data_structures::rustc_erase_owner;
-use rustc_data_structures::stable_map::FxHashMap;
 use rustc_data_structures::sync::MetadataRef;
 use rustc_middle::mir::interpret::Allocation;
 use rustc_middle::span_bug;
@@ -269,10 +269,6 @@ impl<'tcx> GotocCtx<'tcx> {
             self.symbol_table.replace_with_completion(sym);
         }
         Type::union_tag(union_name)
-    }
-
-    pub fn find_function<T: Into<InternedString>>(&mut self, fname: T) -> Option<Expr> {
-        self.symbol_table.lookup(fname).map(|s| s.to_expr())
     }
 
     /// Makes a __attribute__((constructor)) fnname() {body} initalizer function
