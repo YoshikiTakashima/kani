@@ -16,7 +16,5 @@
 	branch = main
 [submodule "dev-proptest"]
 	path = library/proptest
-	url = git@github.com:YoshikiTakashima/kani.git
+	url = https://github.com/YoshikiTakashima/kani.git
 	branch = features/dev-proptest
-[submodule "library/proptest"]
-	url = https://github.com/model-checking/kani.git
