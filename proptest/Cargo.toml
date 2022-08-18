@@ -122,3 +122,6 @@ optional = true
 
 [dev-dependencies]
 regex = "1.0"
+
+[target.'cfg(not(kani))'.dependencies]
+kani = { path = "../../kani" }

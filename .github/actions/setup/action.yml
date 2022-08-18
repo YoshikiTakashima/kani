@@ -8,6 +8,10 @@ inputs:
 runs:
   using: composite
   steps:
+      - name: "Checkout development env, which is required to have Kani ready."
+        run: git checkout proptest-dev
+        shell: bash
+
       - name: Install dependencies
         run: ./scripts/setup/${{ inputs.os }}/install_deps.sh
         shell: bash

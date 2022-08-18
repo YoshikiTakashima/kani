@@ -10,23 +10,26 @@ set -o nounset
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 export PATH=$SCRIPT_DIR:$PATH
-KANI_DIR=$SCRIPT_DIR/..
+KANI_DIR=$SCRIPT_DIR/../../..
 
 # Formatting check
-${SCRIPT_DIR}/kani-fmt.sh --check
+${KANI_DIR}/scripts/kani-fmt.sh --check
 
 # Build all packages in the workspace
 cargo build --workspace
 
-# Unit tests
-cargo test -p proptest
-# proptest-derive not working.
+cd $SCRIPT_DIR/../proptest
 
-# TODO: for parts where Kani is enabled, test with kani.
+# Unit tests
+cargo test
+# proptest-derive not implemented for now
+
+# Run proptest's internal tests using kani. None for now.
+cargo kani --only-codegen
 
 # Check that documentation compiles.
 cargo doc --workspace --no-deps --exclude std
 
 echo
-echo "All Kani regression tests completed successfully."
+echo "All proptest regressions completed successfully."
 echo
