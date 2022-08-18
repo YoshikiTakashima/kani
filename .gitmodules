@@ -14,3 +14,7 @@
 	path = tests/perf/s2n-quic
 	url = https://github.com/aws/s2n-quic
 	branch = main
+[submodule "dev-proptest"]
+	path = library/proptest
+	url = git@github.com:YoshikiTakashima/kani.git
+	branch = features/dev-proptest
