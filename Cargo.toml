@@ -38,7 +38,8 @@ strip = "debuginfo"
 members = [
   "library/kani",
   "library/std",
-  "library/proptest",
+  "library/proptest/proptest",
+  "library/proptest/proptest-derive",
   "tools/bookrunner",
   "tools/compiletest",
   "tools/make-kani-release",
@@ -58,4 +59,5 @@ exclude = [
   "tests/cargo-kani",
   "tests/perf",
   "tests/cargo-ui",
+  "library/proptest/proptest/test-persistence-location/",
 ]
