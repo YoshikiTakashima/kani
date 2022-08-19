@@ -3,7 +3,7 @@
 
 //! cargo-kani test crate for proptest.
 
-mod arbitrary_boolean;
+// mod arbitrary_boolean;
 mod proptest_library_is_linked;
-mod compose;
+// mod compose;
 
