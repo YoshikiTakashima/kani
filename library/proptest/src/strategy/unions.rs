@@ -16,10 +16,6 @@ use crate::std_facade::{fmt, Arc, Vec};
 use core::cmp::{max, min};
 use core::u32;
 
-// #[cfg(not(feature = "std"))]
-// use num_traits::float::FloatCore;
-
-use crate::num::sample_uniform;
 use crate::strategy::{lazy::LazyValueTree, traits::*};
 use crate::test_runner::*;
 
@@ -109,36 +105,28 @@ impl<T: Strategy> Union<T> {
     }
 }
 
-fn pick_weighted<I: Iterator<Item = u32>>(
-    runner: &mut TestRunner,
-    weights1: I,
-    weights2: I,
-) -> usize {
-    let sum = weights1.map(u64::from).sum();
-    let weighted_pick = sample_uniform(runner, 0..sum);
-    weights2
-        .scan(0u64, |state, w| {
-            *state += u64::from(w);
-            Some(*state)
-        })
-        .filter(|&v| v <= weighted_pick)
-        .count()
-}
+// fn pick_weighted<I: Iterator<Item = u32>>(
+//     runner: &mut TestRunner,
+//     weights1: I,
+//     weights2: I,
+// ) -> usize {
+//     let sum = weights1.map(u64::from).sum();
+//     let weighted_pick = sample_uniform(runner, 0..sum);
+//     weights2
+//         .scan(0u64, |state, w| {
+//             *state += u64::from(w);
+//             Some(*state)
+//         })
+//         .filter(|&v| v <= weighted_pick)
+//         .count()
+// }
 
 impl<T: Strategy> Strategy for Union<T> {
     type Tree = UnionValueTree<T>;
     type Value = T::Value;
 
     fn new_tree(&self, runner: &mut TestRunner) -> NewTree<Self> {
-        fn extract_weight<V>(&(w, _): &WA<V>) -> u32 {
-            w
-        }
-
-        let pick = pick_weighted(
-            runner,
-            self.options.iter().map(extract_weight::<T>),
-            self.options.iter().map(extract_weight::<T>),
-        );
+        let pick = kani::any::<usize>() % self.options.len();
 
         let mut options = Vec::with_capacity(pick);
 
@@ -373,8 +361,8 @@ macro_rules! tuple_union {
 
             fn new_tree(&self, runner: &mut TestRunner) -> NewTree<Self> {
                 let weights = [((self.0).0).0, $(((self.0).$ix).0),*];
-                let pick = pick_weighted(runner, weights.iter().cloned(),
-                                         weights.iter().cloned());
+                let pick = kani::any::<usize>() % weights.len();
+                kani::assume(weights[pick] != 0);
 
                 Ok(TupleUnionValueTree {
                     options: (

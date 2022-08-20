@@ -3,15 +3,19 @@
 
 //! proptest that picks one using the prop_oneof! macro.
 
-proptest::proptest! {
-    fn possible_values_are_even(_ in proptest::strategy::Just(())) {
-        let x =
-            proptest::prop_oneof![
-                1 => 0,
-                2 => 2,
-                0 => 3, // cannot be picked
-            ];
-        assert_eq!(x % 2, 0, "Only possible choice is 0");
+use proptest::strategy::Just;
+use proptest::{proptest, prop_oneof};
+
+proptest! {
+    fn possible_values_are_even(
+        x in
+            prop_oneof![
+                1 => Just(0 as u32),
+                2 => Just(2 as u32),
+                0 => Just(3 as u32), // cannot be picked
+            ]
+    ) {
+        assert_eq!(x % 2, 0, "Just(3) cannot be picked b/c weight is 0");
     }
 }
 
