@@ -60,8 +60,8 @@ pub mod std_facade;
 // mod product_frunk;
 
 // #[cfg(not(feature = "frunk"))]
-// #[macro_use]
-// mod product_tuple;
+#[macro_use]
+mod product_tuple;
 
 // #[macro_use]
 // extern crate bitflags;
@@ -81,8 +81,8 @@ pub mod std_facade;
 // #[macro_use]
 // extern crate rusty_fork;
 
-// #[macro_use]
-// mod macros;
+#[macro_use]
+mod macros;
 
 #[doc(hidden)]
 #[macro_use]
@@ -90,11 +90,10 @@ pub mod sugar;
 
 pub mod arbitrary;
 // pub mod array;
-// pub mod bits;
+pub mod bits;
 pub mod bool;
 // pub mod char;
-/// empty collection stubbed
-pub mod collection {}
+pub mod collection;
 pub mod num;
 pub mod strategy;
 pub mod test_runner;

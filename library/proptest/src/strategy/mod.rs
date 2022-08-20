@@ -40,4 +40,4 @@ pub use self::map::*;
 pub use self::traits::*;
 pub use self::unions::*;
 
-// pub mod statics;
+pub mod statics;
