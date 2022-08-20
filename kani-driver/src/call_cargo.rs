@@ -34,11 +34,9 @@ fn find_target_dir() -> PathBuf {
 impl KaniSession {
     /// Calls `cargo_build` to generate `*.symtab.json` files in `target_dir`
     pub fn cargo_build(&self) -> Result<CargoOutputs> {
-        let build_target = env!("TARGET"); // target architecture, see build.rs
+        let build_target = env!("TARGET"); // see build.rs
         let target_dir = self.args.target_dir.as_ref().unwrap_or(&find_target_dir()).clone();
         let outdir = target_dir.join(build_target).join("debug/deps");
-
-        let kani_extern_lib_path = PathBuf::from(env!("KANI_EXTERN_OUT_DIR"));
 
         let flag_env = {
             let rustc_args = self.kani_rustc_flags();
@@ -52,6 +50,10 @@ impl KaniSession {
             args.push("--no-run".into());
         } else {
             args.push("build".into());
+        }
+
+        if self.args.all_features {
+            args.push("--all-features".into());
         }
 
         if self.args.workspace {
@@ -86,18 +88,10 @@ impl KaniSession {
             });
         }
 
-        let mut symtabs = glob(&outdir.join("*.symtab.json"))?;
-        let mut metadata = glob(&outdir.join("*.kani-metadata.json"))?;
-        if std::env::var("IS_KANI_PROPTEST").is_ok() {
-            // if the "proptests is precent" flag is enabled by cargo-kani
-            symtabs.extend(glob(&kani_extern_lib_path.join("*.symtab.json"))?);
-            metadata.extend(glob(&outdir.join("*.kani-metadata.json"))?);
-        }
-
         Ok(CargoOutputs {
             outdir: outdir.clone(),
-            symtabs,
-            metadata,
+            symtabs: glob(&outdir.join("*.symtab.json"))?,
+            metadata: glob(&outdir.join("*.kani-metadata.json"))?,
             restrictions: self.args.restrict_vtable().then_some(outdir),
         })
     }
