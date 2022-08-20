@@ -21,24 +21,23 @@
 mod flatten;
 mod fuse;
 mod just;
-// mod lazy;
+mod lazy;
 mod map;
 // mod recursive;
 // mod shuffle;
 mod traits;
-// mod unions;
+mod unions;
 
 // pub use self::filter::*;
 // pub use self::filter_map::*;
 pub use self::flatten::*;
 pub use self::fuse::*;
 pub use self::just::*;
-// pub use self::lazy::*;
-// pub use self::lazy::*;
+pub use self::lazy::*;
 pub use self::map::*;
 // pub use self::recursive::*;
 // pub use self::shuffle::*;
 pub use self::traits::*;
-// pub use self::unions::*;
+pub use self::unions::*;
 
 // pub mod statics;
