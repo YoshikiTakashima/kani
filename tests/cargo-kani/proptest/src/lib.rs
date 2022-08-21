@@ -7,3 +7,4 @@ mod arbitrary_boolean;
 mod proptest_library_is_linked;
 mod compose;
 mod one_of;
+mod vec;
