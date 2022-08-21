@@ -138,11 +138,7 @@ impl BitSetLike for Vec<bool> {
     }
 
     fn test(&self, bit: usize) -> bool {
-        if bit >= self.len() {
-            false
-        } else {
-            self[bit]
-        }
+        if bit >= self.len() { false } else { self[bit] }
     }
 
     fn set(&mut self, bit: usize) {
@@ -183,21 +179,13 @@ impl<T: BitSetLike> BitSetStrategy<T> {
     /// Due to the generics, the functions in the typed submodules are usually
     /// preferable to calling this directly.
     pub fn new(min: usize, max: usize) -> Self {
-        BitSetStrategy {
-            min,
-            max,
-            mask: None,
-        }
+        BitSetStrategy { min, max, mask: None }
     }
 
     /// Create a strategy which generates values where any bits set (and only
     /// those bits) in `mask` may be set.
     pub fn masked(mask: T) -> Self {
-        BitSetStrategy {
-            min: 0,
-            max: mask.len(),
-            mask: Some(mask),
-        }
+        BitSetStrategy { min: 0, max: mask.len(), mask: Some(mask) }
     }
 }
 
@@ -208,19 +196,12 @@ impl<T: BitSetLike> Strategy for BitSetStrategy<T> {
     fn new_tree(&self, runner: &mut TestRunner) -> NewTree<Self> {
         let mut inner = T::new_bitset(self.max);
         for bit in self.min..self.max {
-            if self.mask.as_ref().map_or(true, |mask| mask.test(bit))
-                && kani::any::<bool>()
-            {
+            if self.mask.as_ref().map_or(true, |mask| mask.test(bit)) && kani::any::<bool>() {
                 inner.set(bit);
             }
         }
 
-        Ok(BitSetValueTree {
-            inner,
-            shrink: self.min,
-            prev_shrink: None,
-            min_count: 0,
-        })
+        Ok(BitSetValueTree { inner, shrink: self.min, prev_shrink: None, min_count: 0 })
     }
 }
 
@@ -265,11 +246,7 @@ impl<T: BitSetLike> SampledBitSetStrategy<T> {
             size.start(),
             size.end_excl()
         );
-        SampledBitSetStrategy {
-            size,
-            bits,
-            _marker: PhantomData,
-        }
+        SampledBitSetStrategy { size, bits, _marker: PhantomData }
     }
 }
 
@@ -279,11 +256,7 @@ impl<T: BitSetLike> Strategy for SampledBitSetStrategy<T> {
 
     fn new_tree(&self, runner: &mut TestRunner) -> NewTree<Self> {
         let mut bits = T::new_bitset(self.bits.end_excl());
-        let count = sample_uniform_incl(
-            runner,
-            self.size.start(),
-            self.size.end_incl(),
-        );
+        let count = sample_uniform_incl(runner, self.size.start(), self.size.end_incl());
         if bits.len() < count {
             panic!("not enough bits to sample");
         }
@@ -354,11 +327,7 @@ macro_rules! int_api {
             use super::*;
 
             /// Generates integers where all bits may be set.
-            pub const ANY: BitSetStrategy<$typ> = BitSetStrategy {
-                min: 0,
-                max: $max,
-                mask: None,
-            };
+            pub const ANY: BitSetStrategy<$typ> = BitSetStrategy { min: 0, max: $max, mask: None };
 
             /// Generates values where bits between the given bounds may be
             /// set.
@@ -604,12 +573,7 @@ mod test {
             let mut prev = value.current();
             while value.simplify() {
                 let v = value.current();
-                assert!(
-                    1 == (prev & !v).count_ones(),
-                    "Shrank from {} to {}",
-                    prev,
-                    v
-                );
+                assert!(1 == (prev & !v).count_ones(), "Shrank from {} to {}", prev, v);
                 prev = v;
             }
 
@@ -657,10 +621,8 @@ mod test {
             assert!(seen_counts[i] >= 256 && seen_counts[i] < 1024);
         }
 
-        let least_seen_bit_count =
-            seen_bits[10..20].iter().cloned().min().unwrap();
-        let most_seen_bit_count =
-            seen_bits[10..20].iter().cloned().max().unwrap();
+        let least_seen_bit_count = seen_bits[10..20].iter().cloned().min().unwrap();
+        let most_seen_bit_count = seen_bits[10..20].iter().cloned().max().unwrap();
         assert_eq!(1, most_seen_bit_count / least_seen_bit_count);
     }
 

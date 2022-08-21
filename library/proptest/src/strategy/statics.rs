@@ -62,11 +62,7 @@ impl<S, F> Filter<S, F> {
     pub fn new(source: S, whence: Reason, filter: F) -> Self {
         // NOTE: We don't use universal quantification R: Into<Reason>
         // since the module is not conveniently exposed.
-        Filter {
-            source,
-            whence,
-            fun: filter,
-        }
+        Filter { source, whence, fun: filter }
     }
 }
 
@@ -88,11 +84,7 @@ impl<S: Strategy, F: FilterFn<S::Value> + Clone> Strategy for Filter<S, F> {
         let val = self.source.new_tree(runner)?;
         kani::assume(self.fun.apply(&val.current()));
 
-        Ok(Filter {
-            source: val,
-            whence: "unused".into(),
-            fun: self.fun.clone(),
-        })
+        Ok(Filter { source: val, whence: "unused".into(), fun: self.fun.clone() })
     }
 }
 
@@ -165,10 +157,7 @@ impl<S, F> Map<S, F> {
 
 impl<S: fmt::Debug, F> fmt::Debug for Map<S, F> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.debug_struct("Map")
-            .field("source", &self.source)
-            .field("fun", &"<function>")
-            .finish()
+        f.debug_struct("Map").field("source", &self.source).field("fun", &"<function>").finish()
     }
 }
 
@@ -177,10 +166,7 @@ impl<S: Strategy, F: Clone + MapFn<S::Value>> Strategy for Map<S, F> {
     type Value = F::Output;
 
     fn new_tree(&self, runner: &mut TestRunner) -> NewTree<Self> {
-        self.source.new_tree(runner).map(|v| Map {
-            source: v,
-            fun: self.fun.clone(),
-        })
+        self.source.new_tree(runner).map(|v| Map { source: v, fun: self.fun.clone() })
     }
 }
 

@@ -50,18 +50,14 @@ impl<T: Strategy> Union<T> {
     ///
     /// Panics if `options` is empty.
     pub fn new(options: impl IntoIterator<Item = T>) -> Self {
-        let options: Vec<WA<T>> =
-            options.into_iter().map(|v| (1, Arc::new(v))).collect();
+        let options: Vec<WA<T>> = options.into_iter().map(|v| (1, Arc::new(v))).collect();
         assert!(!options.is_empty());
         Self { options }
     }
 
-    pub(crate) fn _try_new<E>(
-        it: impl Iterator<Item = Result<T, E>>,
-    ) -> Result<Self, E> {
-        let options: Vec<WA<T>> = it
-            .map(|r| r.map(|v| (1, Arc::new(v))))
-            .collect::<Result<_, _>>()?;
+    pub(crate) fn _try_new<E>(it: impl Iterator<Item = Result<T, E>>) -> Result<Self, E> {
+        let options: Vec<WA<T>> =
+            it.map(|r| r.map(|v| (1, Arc::new(v)))).collect::<Result<_, _>>()?;
 
         assert!(!options.is_empty());
         Ok(Self { options })
@@ -80,20 +76,13 @@ impl<T: Strategy> Union<T> {
     ///
     /// Panics if the sum of the weights overflows a `u32`.
     pub fn new_weighted(options: Vec<W<T>>) -> Self {
-
+        assert!(!options.iter().any(|&(w, _)| 0 == w), "Union option has a weight of 0");
         assert!(
-            !options.iter().any(|&(w, _)| 0 == w),
-            "Union option has a weight of 0"
-        );
-        assert!(
-            options.iter().map(|&(w, _)| u64::from(w)).sum::<u64>()
-                <= u64::from(u32::MAX),
+            options.iter().map(|&(w, _)| u64::from(w)).sum::<u64>() <= u64::from(u32::MAX),
             "Union weights overflow u32"
         );
         let options: Vec<WA<T>> =
-            options.into_iter()
-            .filter(|(w, _)| w > &0)
-            .map(|(w, v)| (w, Arc::new(v))).collect();
+            options.into_iter().filter(|(w, _)| w > &0).map(|(w, v)| (w, Arc::new(v))).collect();
         assert!(!options.is_empty());
         Self { options }
     }
@@ -138,16 +127,9 @@ impl<T: Strategy> Strategy for Union<T> {
         // Initialize the tree at pick so at least one value is available. Note
         // that if generation for the value at pick fails, the entire strategy
         // will fail. This seems like the right call.
-        options.push(LazyValueTree::new_initialized(
-            self.options[pick].1.new_tree(runner)?,
-        ));
+        options.push(LazyValueTree::new_initialized(self.options[pick].1.new_tree(runner)?));
 
-        Ok(UnionValueTree {
-            options,
-            pick,
-            min_pick: 0,
-            prev_pick: None,
-        })
+        Ok(UnionValueTree { options, pick, min_pick: 0, prev_pick: None })
     }
 }
 
@@ -452,10 +434,7 @@ pub fn float_to_weight(f: f64) -> (u32, u32) {
     assert!(f > 0.0 && f < 1.0, "Invalid probability: {}", f);
 
     // Clamp to 1..WEIGHT_BASE-1 so that we never produce a weight of 0.
-    let pos = max(
-        1,
-        min(WEIGHT_BASE - 1, (f * f64::from(WEIGHT_BASE)).round() as u32),
-    );
+    let pos = max(1, min(WEIGHT_BASE - 1, (f * f64::from(WEIGHT_BASE)).round() as u32));
     let neg = WEIGHT_BASE - pos;
 
     (pos, neg)

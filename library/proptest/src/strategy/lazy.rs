@@ -29,10 +29,7 @@ pub struct LazyValueTree<S: Strategy> {
 
 enum LazyValueTreeState<S: Strategy> {
     Initialized(S::Tree),
-    Uninitialized {
-        strategy: Arc<S>,
-        runner: TestRunner,
-    },
+    Uninitialized { strategy: Arc<S>, runner: TestRunner },
     Failed,
 }
 
@@ -41,24 +38,19 @@ impl<S: Strategy> LazyValueTree<S> {
     /// `maybe_init` is called.
     pub(crate) fn new(strategy: Arc<S>, runner: &mut TestRunner) -> Self {
         let runner = runner.partial_clone();
-        Self {
-            state: LazyValueTreeState::Uninitialized { strategy, runner },
-        }
+        Self { state: LazyValueTreeState::Uninitialized { strategy, runner } }
     }
 
     /// Create a new value tree that has already been initialized.
     pub(crate) fn new_initialized(value_tree: S::Tree) -> Self {
-        Self {
-            state: LazyValueTreeState::Initialized(value_tree),
-        }
+        Self { state: LazyValueTreeState::Initialized(value_tree) }
     }
 
     /// Returns a reference to the inner value tree if initialized.
     pub(crate) fn as_inner(&self) -> Option<&S::Tree> {
         match &self.state {
             LazyValueTreeState::Initialized(v) => Some(v),
-            LazyValueTreeState::Uninitialized { .. }
-            | LazyValueTreeState::Failed => None,
+            LazyValueTreeState::Uninitialized { .. } | LazyValueTreeState::Failed => None,
         }
     }
 
@@ -66,8 +58,7 @@ impl<S: Strategy> LazyValueTree<S> {
     pub(crate) fn as_inner_mut(&mut self) -> Option<&mut S::Tree> {
         match &mut self.state {
             LazyValueTreeState::Initialized(v) => Some(v),
-            LazyValueTreeState::Uninitialized { .. }
-            | LazyValueTreeState::Failed => None,
+            LazyValueTreeState::Uninitialized { .. } | LazyValueTreeState::Failed => None,
         }
     }
 
@@ -79,16 +70,10 @@ impl<S: Strategy> LazyValueTree<S> {
 
         let state = mem::replace(&mut self.state, LazyValueTreeState::Failed);
         match state {
-            LazyValueTreeState::Uninitialized {
-                strategy,
-                mut runner,
-            } => {
+            LazyValueTreeState::Uninitialized { strategy, mut runner } => {
                 match strategy.new_tree(&mut runner) {
                     Ok(v) => {
-                        let _ = mem::replace(
-                            &mut self.state,
-                            LazyValueTreeState::Initialized(v),
-                        );
+                        let _ = mem::replace(&mut self.state, LazyValueTreeState::Initialized(v));
                     }
                     Err(_) => {
                         // self.state is set to Failed above. Keep it that way.
@@ -105,9 +90,7 @@ impl<S: Strategy> LazyValueTree<S> {
     pub(crate) fn is_uninitialized(&self) -> bool {
         match &self.state {
             LazyValueTreeState::Uninitialized { .. } => true,
-            LazyValueTreeState::Initialized(_) | LazyValueTreeState::Failed => {
-                false
-            }
+            LazyValueTreeState::Initialized(_) | LazyValueTreeState::Failed => false,
         }
     }
 
@@ -115,8 +98,7 @@ impl<S: Strategy> LazyValueTree<S> {
     pub(crate) fn is_initialized(&self) -> bool {
         match &self.state {
             LazyValueTreeState::Initialized(_) => true,
-            LazyValueTreeState::Uninitialized { .. }
-            | LazyValueTreeState::Failed => false,
+            LazyValueTreeState::Uninitialized { .. } | LazyValueTreeState::Failed => false,
         }
     }
 }
@@ -126,9 +108,7 @@ where
     S::Tree: Clone,
 {
     fn clone(&self) -> Self {
-        Self {
-            state: self.state.clone(),
-        }
+        Self { state: self.state.clone() }
     }
 }
 
@@ -137,9 +117,7 @@ where
     S::Tree: fmt::Debug,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.debug_struct("LazyValueTree")
-            .field("state", &self.state)
-            .finish()
+        f.debug_struct("LazyValueTree").field("state", &self.state).finish()
     }
 }
 
@@ -152,10 +130,9 @@ where
 
         match self {
             Initialized(v) => Initialized(v.clone()),
-            Uninitialized { strategy, runner } => Uninitialized {
-                strategy: Arc::clone(strategy),
-                runner: runner.clone(),
-            },
+            Uninitialized { strategy, runner } => {
+                Uninitialized { strategy: Arc::clone(strategy), runner: runner.clone() }
+            }
             Failed => Failed,
         }
     }
@@ -170,10 +147,9 @@ where
             LazyValueTreeState::Initialized(value_tree) => {
                 f.debug_tuple("Initialized").field(value_tree).finish()
             }
-            LazyValueTreeState::Uninitialized { strategy, .. } => f
-                .debug_struct("Uninitialized")
-                .field("strategy", strategy)
-                .finish(),
+            LazyValueTreeState::Uninitialized { strategy, .. } => {
+                f.debug_struct("Uninitialized").field("strategy", strategy).finish()
+            }
             LazyValueTreeState::Failed => write!(f, "Failed"),
         }
     }
