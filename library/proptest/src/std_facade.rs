@@ -41,4 +41,5 @@ pub use ::std::collections::hash_map;
 pub use ::std::collections::hash_set;
 
 pub use ::std::cell::Cell;
+pub use ::std::cell::RefCell;
 pub use ::std::fmt;
