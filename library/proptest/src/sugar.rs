@@ -735,7 +735,9 @@ macro_rules! prop_assert {
     };
 
     ($cond:expr, $($fmt:tt)*) => {
-        assert!($cond, $($fmt:tt)*)
+        let message = format!($($fmt)*);
+        let message = format!("{} at {}:{}", message, file!(), line!());
+        assert!($cond, "{}", message);
     };
 }
 
