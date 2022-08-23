@@ -14,14 +14,14 @@
 
 //! Arbitrary implementations for liballoc.
 
-#[cfg(feature = "unstable")]
-mod alloc;
-mod borrow;
-mod boxed;
-mod char;
+// #[cfg(feature = "unstable")]
+// mod alloc;
+// mod borrow;
+// mod boxed;
+// mod char;
 mod collections;
-mod hash;
-mod ops;
-mod rc;
-mod str;
-mod sync;
+// mod hash;
+// mod ops;
+// mod rc;
+// mod str;
+// mod sync;
