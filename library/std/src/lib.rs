@@ -15,6 +15,10 @@ pub use std::*;
 // Override process calls with stubs.
 pub mod process;
 
+// EXPERIMENTAL: override time module, which also requires sys::time
+pub mod time;
+mod sys_time;
+
 /// This assert macro calls kani's assert function passing it down the condition
 /// as well as a message that will be used when reporting the assertion result.
 ///
