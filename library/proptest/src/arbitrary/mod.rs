@@ -19,8 +19,8 @@
 //!
 //! [`Arbitrary`]: trait.Arbitrary.html
 
-// use crate::strategy::statics;
-// use crate::strategy::{Map, Strategy};
+use crate::strategy::statics;
+use crate::strategy::{Map, Strategy};
 
 //==============================================================================
 // Trait and impls
@@ -54,20 +54,20 @@ pub use self::traits::*;
 // SMapped + Mapped aliases to make documentation clearer.
 //==============================================================================
 
-// pub(crate) type SFnPtrMap<S, O> = statics::Map<S, fn(<S as Strategy>::Value) -> O>;
+pub(crate) type SFnPtrMap<S, O> = statics::Map<S, fn(<S as Strategy>::Value) -> O>;
 
-// /// A static map from a strategy of `I` to `O`.
-// ///
-// /// # Stability
-// ///
-// /// This is provided to make documentation more readable.
-// /// Do not rely on it existing in your own code.
-// pub type SMapped<I, O> = statics::Map<StrategyFor<I>, fn(I) -> O>;
+/// A static map from a strategy of `I` to `O`.
+///
+/// # Stability
+///
+/// This is provided to make documentation more readable.
+/// Do not rely on it existing in your own code.
+pub type SMapped<I, O> = statics::Map<StrategyFor<I>, fn(I) -> O>;
 
-// /// A normal map from a strategy of `I` to `O`.
-// ///
-// /// # Stability
-// ///
-// /// This is provided to make documentation more readable.
-// /// Do not rely on it existing in your own code.
-// pub type Mapped<I, O> = Map<StrategyFor<I>, fn(I) -> O>;
+/// A normal map from a strategy of `I` to `O`.
+///
+/// # Stability
+///
+/// This is provided to make documentation more readable.
+/// Do not rely on it existing in your own code.
+pub type Mapped<I, O> = Map<StrategyFor<I>, fn(I) -> O>;
