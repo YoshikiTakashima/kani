@@ -14,14 +14,14 @@
 
 //! Arbitrary implementations for libstd.
 
-mod env;
-mod ffi;
-mod fs;
-mod io;
-mod net;
-mod panic;
-mod path;
-mod string;
-mod sync;
-mod thread;
+// mod env;
+// mod ffi;
+// mod fs;
+// mod io;
+// mod net;
+// mod panic;
+// mod path;
+// mod string;
+// mod sync;
+// mod thread;
 mod time;

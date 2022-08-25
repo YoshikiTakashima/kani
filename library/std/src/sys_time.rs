@@ -202,9 +202,11 @@ mod inner {
 
     impl Instant {
         pub fn now() -> Self {
-            assert!(false, "UNSOUND UNDER-APPROXIMATION");
             Self {
-                t: Timespec::zero(),
+                t: Timespec {
+                    tv_sec: kani::any(),
+                    tv_nsec: kani::any(),
+                },
             }
         }
 

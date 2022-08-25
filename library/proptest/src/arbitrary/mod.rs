@@ -46,7 +46,7 @@ mod tuples;
 mod _alloc;
 
 //#[cfg(feature = "std")]
-// mod _std;
+mod _std;
 
 pub use self::traits::*;
 

@@ -26,7 +26,12 @@ arbitrary!(Duration, SMapped<(u64, u32), Self>;
 );
 
 // Instant::now() "never" returns the same Instant, so no shrinking may occur!
-arbitrary!(Instant; Self::now());
+// arbitrary!(Instant; Self::now()); //TODO: debug this somehow
+// requires kani::any???
+arbitrary!(Instant, SMapped<(), Self>;
+    static_map(any::<()>(), |_| Self::now())
+);
+
 
 arbitrary!(
     // We can't use `any::<Duration>()` because the addition to `SystemTime`
@@ -45,11 +50,11 @@ arbitrary!(
                 })
 );
 
-#[cfg(test)]
-mod test {
-    no_panic_test!(
-        duration => Duration,
-        instant  => Instant,
-        system_time => SystemTime
-    );
-}
+// #[cfg(test)]
+// mod test {
+//     no_panic_test!(
+//         duration => Duration,
+//         instant  => Instant,
+//         system_time => SystemTime
+//     );
+// }
