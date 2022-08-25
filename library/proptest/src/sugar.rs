@@ -730,15 +730,15 @@ macro_rules! prop_compose {
 /// ```
 #[macro_export]
 macro_rules! prop_assert {
-    ($cond:expr) => {
+    ($cond:expr) => { {
         $crate::prop_assert!($cond, concat!("assertion failed: ", stringify!($cond)))
-    };
+    } };
 
-    ($cond:expr, $($fmt:tt)*) => {
+    ($cond:expr, $($fmt:tt)*) => { {
         let message = format!($($fmt)*);
         let message = format!("{} at {}:{}", message, file!(), line!());
         assert!($cond, "{}", message);
-    };
+    } };
 }
 
 /// Similar to `assert_eq!` from std, but returns a test failure instead of
