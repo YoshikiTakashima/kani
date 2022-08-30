@@ -202,12 +202,13 @@ mod inner {
 
     impl Instant {
         pub fn now() -> Self {
-            Self {
-                t: Timespec {
-                    tv_sec: kani::any(),
-                    tv_nsec: kani::any(),
-                },
-            }
+            todo!()
+            // Self {
+            //     t: Timespec {
+            //         tv_sec: kani::any(),
+            //         tv_nsec: kani::any(),
+            //     },
+            // }
         }
 
         pub fn checked_sub_instant(&self, other: &Instant) -> Option<Duration> {
