@@ -193,7 +193,7 @@ impl<T: BitSetLike> Strategy for BitSetStrategy<T> {
     type Tree = BitSetValueTree<T>;
     type Value = T;
 
-    fn new_tree(&self, runner: &mut TestRunner) -> NewTree<Self> {
+    fn new_tree(&self, _: &mut TestRunner) -> NewTree<Self> {
         let mut inner = T::new_bitset(self.max);
         for bit in self.min..self.max {
             if self.mask.as_ref().map_or(true, |mask| mask.test(bit)) && kani::any::<bool>() {
@@ -261,9 +261,13 @@ impl<T: BitSetLike> Strategy for SampledBitSetStrategy<T> {
             panic!("not enough bits to sample");
         }
 
-        // for bit in self.bits.iter().choose_multiple(runner.rng(), count) {
-        //     bits.set(bit);
-        // }
+        let mut ctr = 0;
+        for bit in self.bits.iter() {
+            if ctr < count && kani::any() {
+                bits.set(bit);
+                ctr += 1;
+            }
+        }
 
         Ok(BitSetValueTree {
             inner: bits,
