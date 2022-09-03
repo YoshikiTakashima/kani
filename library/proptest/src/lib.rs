@@ -96,7 +96,7 @@ mod macros;
 pub mod sugar;
 
 pub mod arbitrary;
-// pub mod array;
+pub mod array;
 pub mod bits;
 pub mod bool;
 // pub mod char;
