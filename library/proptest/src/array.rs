@@ -24,6 +24,7 @@
 //! General implementations are available for sizes 1 through 32.
 
 use core::marker::PhantomData;
+use crate::std_facade::{Rc, RefCell};
 
 use crate::strategy::*;
 use crate::test_runner::*;
@@ -78,9 +79,9 @@ impl<S, T> UniformArrayStrategy<S, T> {
 }
 
 /// A `ValueTree` operating over a fixed-size array.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)] // optimization cannot support trait: Copy
 pub struct ArrayValueTree<T> {
-    tree: T,
+    current: Rc<RefCell<Option<T>>>,
     shrinker: usize,
     last_shrinker: Option<usize>,
 }
@@ -105,12 +106,12 @@ macro_rules! small_array {
         }
 
         impl<S : Strategy> Strategy for [S; $n] {
-            type Tree = ArrayValueTree<[S::Tree; $n]>;
+            type Tree = ArrayValueTree<[S::Value; $n]>;
             type Value = [S::Value; $n];
 
             fn new_tree(&self, runner: &mut TestRunner) -> NewTree<Self> {
                 Ok(ArrayValueTree {
-                    tree: [$(self[$ix].new_tree(runner)?,)*],
+                    current: Rc::new(RefCell::new(Some([$(self[$ix].new_tree(runner)?.current(),)*]))),
                     shrinker: 0,
                     last_shrinker: None,
                 })
@@ -119,53 +120,34 @@ macro_rules! small_array {
 
         impl<S : Strategy> Strategy
         for UniformArrayStrategy<S, [S::Value; $n]> {
-            type Tree = ArrayValueTree<[S::Tree; $n]>;
+            type Tree = ArrayValueTree<[S::Value; $n]>;
             type Value = [S::Value; $n];
 
             fn new_tree(&self, runner: &mut TestRunner) -> NewTree<Self> {
                 Ok(ArrayValueTree {
-                    tree: [$({
+                    current: Rc::new(RefCell::new(Some([$({
                         let _ = $ix;
-                        self.strategy.new_tree(runner)?
-                    },)*],
+                        self.strategy.new_tree(runner)?.current()
+                    },)*]))),
                     shrinker: 0,
                     last_shrinker: None,
                 })
             }
         }
 
-        impl<T : ValueTree> ValueTree for ArrayValueTree<[T;$n]> {
-            type Value = [T::Value;$n];
+        impl<T : std::fmt::Debug> ValueTree for ArrayValueTree<[T;$n]> {
+            type Value = [T;$n];
 
-            fn current(&self) -> [T::Value;$n] {
-                [$(self.tree[$ix].current(),)*]
+            fn current(&self) -> [T;$n] {
+                self.current.as_ref().replace(None).unwrap()
             }
 
             fn simplify(&mut self) -> bool {
-                while self.shrinker < $n {
-                    if self.tree[self.shrinker].simplify() {
-                        self.last_shrinker = Some(self.shrinker);
-                        return true;
-                    } else {
-                        self.shrinker += 1;
-                    }
-                }
-
                 false
             }
 
             fn complicate(&mut self) -> bool {
-                if let Some(shrinker) = self.last_shrinker {
-                    self.shrinker = shrinker;
-                    if self.tree[shrinker].complicate() {
-                        true
-                    } else {
-                        self.last_shrinker = None;
-                        false
-                    }
-                } else {
-                    false
-                }
+                false
             }
         }
     }
