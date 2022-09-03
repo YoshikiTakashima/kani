@@ -17,7 +17,7 @@
 // #[cfg(feature = "unstable")]
 // mod alloc;
 // mod borrow;
-// mod boxed;
+mod boxed;
 // mod char;
 mod collections;
 // mod hash;

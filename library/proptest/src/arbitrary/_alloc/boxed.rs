@@ -15,8 +15,18 @@
 //! Arbitrary implementations for `std::boxed`.
 
 use crate::std_facade::Box;
+use crate::arbitrary::Arbitrary;
+use crate::strategy::{Strategy, MapInto};
+// wrap_from!(Box);
 
-wrap_from!(Box);
+impl<A: Arbitrary> Arbitrary for Box<A> {
+    type Parameters = A::Parameters;
+    type Strategy = MapInto<A::Strategy, Self>;
+    fn arbitrary_with(args: Self::Parameters) -> Self::Strategy {
+        A::arbitrary_with(args)
+            .prop_map_into()
+    }
+}
 
 #[cfg(test)]
 mod test {

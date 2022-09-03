@@ -89,22 +89,22 @@ pub trait Strategy: fmt::Debug {
         Map { source: self, fun: Arc::new(fun) }
     }
 
-    // /// Returns a strategy which produces values of type `O` by transforming
-    // /// `Self` with `Into<O>`.
-    // ///
-    // /// You should always prefer this operation instead of `prop_map` when
-    // /// you can as it is both clearer and also currently more efficient.
-    // ///
-    // /// There is no need (or possibility, for that matter) to define how the
-    // /// output is to be shrunken. Shrinking continues to take place in terms of
-    // /// the source value.
-    // fn prop_map_into<O: fmt::Debug>(self) -> MapInto<Self, O>
-    // where
-    //     Self: Sized,
-    //     Self::Value: Into<O>,
-    // {
-    //     MapInto::new(self)
-    // }
+    /// Returns a strategy which produces values of type `O` by transforming
+    /// `Self` with `Into<O>`.
+    ///
+    /// You should always prefer this operation instead of `prop_map` when
+    /// you can as it is both clearer and also currently more efficient.
+    ///
+    /// There is no need (or possibility, for that matter) to define how the
+    /// output is to be shrunken. Shrinking continues to take place in terms of
+    /// the source value.
+    fn prop_map_into<O: fmt::Debug>(self) -> MapInto<Self, O>
+    where
+        Self: Sized,
+        Self::Value: Into<O>,
+    {
+        MapInto::new(self)
+    }
 
     // /// Returns a strategy which produces values transformed by the function
     // /// `fun`, which is additionally given a random number generator.
@@ -495,51 +495,51 @@ pub trait Strategy: fmt::Debug {
     //     Shuffle(self)
     // }
 
-    // /// Erases the type of this `Strategy` so it can be passed around as a
-    // /// simple trait object.
-    // ///
-    // /// See also `sboxed()` if this `Strategy` is `Send` and `Sync` and you
-    // /// want to preserve that information.
-    // ///
-    // /// Strategies of this type afford cheap shallow cloning via reference
-    // /// counting by using an `Arc` internally.
-    // fn boxed(self) -> BoxedStrategy<Self::Value>
-    // where
-    //     Self: Sized + 'static,
-    // {
-    //     BoxedStrategy(Arc::new(BoxedStrategyWrapper(self)))
-    // }
+    /// Erases the type of this `Strategy` so it can be passed around as a
+    /// simple trait object.
+    ///
+    /// See also `sboxed()` if this `Strategy` is `Send` and `Sync` and you
+    /// want to preserve that information.
+    ///
+    /// Strategies of this type afford cheap shallow cloning via reference
+    /// counting by using an `Arc` internally.
+    fn boxed(self) -> BoxedStrategy<Self::Value>
+    where
+        Self: Sized + 'static,
+    {
+        BoxedStrategy(Arc::new(BoxedStrategyWrapper(self)))
+    }
 
-    // /// Erases the type of this `Strategy` so it can be passed around as a
-    // /// simple trait object.
-    // ///
-    // /// Unlike `boxed()`, this conversion retains the `Send` and `Sync` traits
-    // /// on the output.
-    // ///
-    // /// Strategies of this type afford cheap shallow cloning via reference
-    // /// counting by using an `Arc` internally.
-    // fn sboxed(self) -> SBoxedStrategy<Self::Value>
-    // where
-    //     Self: Sized + Send + Sync + 'static,
-    // {
-    //     SBoxedStrategy(Arc::new(BoxedStrategyWrapper(self)))
-    // }
+    /// Erases the type of this `Strategy` so it can be passed around as a
+    /// simple trait object.
+    ///
+    /// Unlike `boxed()`, this conversion retains the `Send` and `Sync` traits
+    /// on the output.
+    ///
+    /// Strategies of this type afford cheap shallow cloning via reference
+    /// counting by using an `Arc` internally.
+    fn sboxed(self) -> SBoxedStrategy<Self::Value>
+    where
+        Self: Sized + Send + Sync + 'static,
+    {
+        SBoxedStrategy(Arc::new(BoxedStrategyWrapper(self)))
+    }
 
-    // /// Wraps this strategy to prevent values from being subject to shrinking.
-    // ///
-    // /// Suppressing shrinking is useful when testing things like linear
-    // /// approximation functions. Ordinarily, proptest will tend to shrink the
-    // /// input to the function until the result is just barely outside the
-    // /// acceptable range whereas the original input may have produced a result
-    // /// far outside of it. Since this makes it harder to see what the actual
-    // /// problem is, making the input `NoShrink` allows learning about inputs
-    // /// that produce more incorrect results.
-    // fn no_shrink(self) -> NoShrink<Self>
-    // where
-    //     Self: Sized,
-    // {
-    //     NoShrink(self)
-    // }
+    /// Wraps this strategy to prevent values from being subject to shrinking.
+    ///
+    /// Suppressing shrinking is useful when testing things like linear
+    /// approximation functions. Ordinarily, proptest will tend to shrink the
+    /// input to the function until the result is just barely outside the
+    /// acceptable range whereas the original input may have produced a result
+    /// far outside of it. Since this makes it harder to see what the actual
+    /// problem is, making the input `NoShrink` allows learning about inputs
+    /// that produce more incorrect results.
+    fn no_shrink(self) -> NoShrink<Self>
+    where
+        Self: Sized,
+    {
+        NoShrink(self)
+    }
 }
 
 /// A generated value and its associated shrinker.
@@ -723,12 +723,12 @@ impl<T: fmt::Debug> Strategy for BoxedStrategy<T> {
 
     // Optimization: Don't rebox the strategy.
 
-    // fn boxed(self) -> BoxedStrategy<Self::Value>
-    // where
-    //     Self: Sized + 'static,
-    // {
-    //     self
-    // }
+    fn boxed(self) -> BoxedStrategy<Self::Value>
+    where
+        Self: Sized + 'static,
+    {
+        self
+    }
 }
 
 impl<T: fmt::Debug> Strategy for SBoxedStrategy<T> {
@@ -741,19 +741,19 @@ impl<T: fmt::Debug> Strategy for SBoxedStrategy<T> {
 
     // Optimization: Don't rebox the strategy.
 
-    // fn sboxed(self) -> SBoxedStrategy<Self::Value>
-    // where
-    //     Self: Sized + Send + Sync + 'static,
-    // {
-    //     self
-    // }
+    fn sboxed(self) -> SBoxedStrategy<Self::Value>
+    where
+        Self: Sized + Send + Sync + 'static,
+    {
+        self
+    }
 
-    // fn boxed(self) -> BoxedStrategy<Self::Value>
-    // where
-    //     Self: Sized + 'static,
-    // {
-    //     BoxedStrategy(self.0)
-    // }
+    fn boxed(self) -> BoxedStrategy<Self::Value>
+    where
+        Self: Sized + 'static,
+    {
+        BoxedStrategy(self.0)
+    }
 }
 
 #[derive(Debug)]
