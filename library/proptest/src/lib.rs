@@ -19,6 +19,13 @@
 //! For documentation on how to get started with proptest and general usage
 //! advice, please refer to the [Proptest Book](https://altsysrq.github.io/proptest-book/intro.html).
 
+// Unused code has been kept to keep the diff from the original
+// library to a minimum. See #1608 for the final goal of this
+// approach.
+#![allow(dead_code)]
+#![allow(unused_macros)]
+#![allow(unused_imports)]
+
 #![forbid(future_incompatible)]
 #![deny(missing_docs, bare_trait_objects)]
 // #![no_std]
