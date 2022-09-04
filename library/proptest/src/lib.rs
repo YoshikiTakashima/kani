@@ -106,8 +106,8 @@ pub mod strategy;
 pub mod test_runner;
 pub mod tuple;
 
-// pub mod option;
-// pub mod result;
+pub mod option;
+pub mod result;
 // pub mod sample;
 // #[cfg(feature = "std")]
 // pub mod string;

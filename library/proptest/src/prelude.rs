@@ -38,19 +38,18 @@ pub use crate::{
 /// `proptest::num::i32::ANY` plus a separate `use proptest;`.
 pub mod prop {
     pub use crate::arbitrary;
-    // todo: Implement the missing proptest features.
-    // pub use crate::array;
-    // pub use crate::bits;
+    pub use crate::array;
+    pub use crate::bits;
     pub use crate::bool;
     // pub use crate::char;
     pub use crate::collection;
     pub use crate::num;
-    // pub use crate::option;
-    // pub use crate::result;
+    pub use crate::option;
+    pub use crate::result;
     // pub use crate::sample;
     pub use crate::strategy;
-    #[cfg(feature = "std")]
-    pub use crate::string;
+    // #[cfg(feature = "std")]
+    // pub use crate::string;
     pub use crate::test_runner;
     pub use crate::tuple;
 }
