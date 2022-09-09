@@ -160,7 +160,7 @@ macro_rules! proptest {
        fn $test_name:ident($($parm:pat in $strategy:expr),+ $(,)?) $body:block
     )*) => {
         $(
-            #[kani::proof]
+            //#[kani::proof]
             $(#[$meta])*
             fn $test_name() { //rule meta_strategy
                 // let mut config = $config.clone();
@@ -176,7 +176,7 @@ macro_rules! proptest {
         fn $test_name:ident($($arg:tt)+) $body:block
     )*) => {
         $(
-            #[kani::proof]
+            //#[kani::proof]
             $(#[$meta])*
             fn $test_name() { //rule meta_type
                 // let mut config = $config.clone();
