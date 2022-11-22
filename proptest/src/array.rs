@@ -250,6 +250,21 @@ small_array!(32 uniform32:
              0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
              18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31);
 
+#[cfg(kani)]
+mod kani {
+    crate::proptest! {
+    #[kani::unwind(5)]
+    #[kani::proof]
+    fn array_bounded_sums(
+            array_under_1k in [(0i32..1000), (1i32..1000)],
+    ) {
+            let sum: i32 = IntoIterator::into_iter(array_under_1k).sum();
+            assert!(sum  < 2000, "each element is < 1k, 2 elements");
+            assert!(sum >= 1, "second element is at least 1.");
+    }
+    }
+}
+
 #[cfg(all(test, not(kani)))]
 mod test {
     use super::*;
