@@ -254,7 +254,6 @@ small_array!(32 uniform32:
 mod kani {
     crate::proptest! {
     #[kani::unwind(5)]
-    #[kani::proof]
     fn array_bounded_sums(
             array_under_1k in [(0i32..1000), (1i32..1000)],
     ) {

@@ -622,7 +622,6 @@ mod kani_tests {
 
     crate::proptest! {
     #[kani::unwind(5)]
-    #[kani::proof]
     fn vector_even_sums(
         vec_even in vec((0..10).prop_map(|x: i32| x << 1), 0..2),
     ) {
