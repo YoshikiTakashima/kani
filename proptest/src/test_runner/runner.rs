@@ -594,7 +594,6 @@ mod test {
 
     proptest! {
         #[test]
-        #[cfg_attr(kani, kani::proof)]
         fn successfully_linked_proptest(_ in &Just(()) ) {
             let config = Config::default();
             prop_assert_eq!(
@@ -607,7 +606,6 @@ mod test {
 
     proptest! {
     #[test]
-    #[cfg_attr(kani, kani::proof)]
     fn possible_values_are_even(
             x in
         crate::prop_oneof![
@@ -621,7 +619,6 @@ mod test {
     }
 
     #[test]
-    #[cfg_attr(kani, kani::proof)]
     fn test_pass() {
         let mut runner = TestRunner::default();
         let result = runner.run(&(1u32..), |v| {
@@ -641,7 +638,6 @@ mod test {
 
     #[cfg(feature = "fork")]
     #[test]
-    #[cfg_attr(kani, kani::proof)]
     fn normal_failure_in_fork_results_in_correct_failure() {
         let mut runner = TestRunner::new(Config {
             fork: true,
