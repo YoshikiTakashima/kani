@@ -780,7 +780,7 @@ impl<'tcx> GotocCtx<'tcx> {
                         .unwrap();
                 self.codegen_fndef_type(instance)
             }
-            ty::FnPtr(sig) => self.codegen_function_sig(*sig).to_pointer(),
+            ty::FnPtr(sig) => self.codegen_function_sig(*sig, false).to_pointer(),
             ty::Closure(_, subst) => self.codegen_ty_closure(ty, subst),
             ty::Generator(..) => self.codegen_ty_generator(ty),
             ty::Never => self.ensure_struct(NEVER_TYPE_EMPTY_STRUCT_NAME, "!", |_, _| vec![]),
@@ -1290,11 +1290,23 @@ impl<'tcx> GotocCtx<'tcx> {
         Type::code_with_unnamed_parameters(params, self.codegen_ty(sig.output()))
     }
 
-    /// one can only apply this function to a monomorphized signature
-    pub fn codegen_function_sig(&mut self, sig: PolyFnSig<'tcx>) -> Type {
+    /// one can only apply this function to a monomorphized
+    /// signature.
+    ///
+    /// Note: rustc sometimes removes the first argument `self` to
+    /// optimize closures that don't capture any variables. To deal
+    /// with this reification, set `reify_self` to true and delete the
+    /// first argument. In all other cases, this flag SHOULD NEVER be
+    /// used.
+    pub fn codegen_function_sig(&mut self, sig: PolyFnSig<'tcx>, reify_self: bool) -> Type {
         let sig = self.monomorphize(sig);
         let sig = self.tcx.normalize_erasing_late_bound_regions(ty::ParamEnv::reveal_all(), sig);
-        let params = sig.inputs().iter().map(|t| self.codegen_ty(*t)).collect();
+
+	let mut params_iter = sig.inputs().iter();
+	if reify_self {
+	    params_iter.next(); // dump `self` first arg.
+	}
+        let params = params_iter.map(|t| self.codegen_ty(*t)).collect();
 
         if sig.c_variadic {
             Type::variadic_code_with_unnamed_parameters(params, self.codegen_ty(sig.output()))

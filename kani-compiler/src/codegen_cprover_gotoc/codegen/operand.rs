@@ -735,9 +735,9 @@ impl<'tcx> GotocCtx<'tcx> {
     /// because the symbol should have the type. The problem is that the type in the symbol table
     /// sometimes subtly differs from the type that codegen_function_sig returns.
     /// This is tracked in <https://github.com/model-checking/kani/issues/1350>.
-    fn codegen_func_symbol(&mut self, instance: Instance<'tcx>) -> (&Symbol, Type) {
+    fn codegen_func_symbol(&mut self, instance: Instance<'tcx>, reify_self: bool) -> (&Symbol, Type) {
         let func = self.symbol_name(instance);
-        let funct = self.codegen_function_sig(self.fn_sig_of_instance(instance));
+        let funct = self.codegen_function_sig(self.fn_sig_of_instance(instance), reify_self);
         // make sure the functions imported from other modules (or externs) are in the symbol table
         let sym = self.ensure(&func, |ctx, _| {
             Symbol::function(
@@ -758,7 +758,21 @@ impl<'tcx> GotocCtx<'tcx> {
     ///
     /// This should not be used where Rust expects a "function item" (See `codegen_fn_item`)
     pub fn codegen_func_expr(&mut self, instance: Instance<'tcx>, span: Option<&Span>) -> Expr {
-        let (func_symbol, func_typ) = self.codegen_func_symbol(instance);
+        let (func_symbol, func_typ) = self.codegen_func_symbol(instance, false);
+        Expr::symbol_expression(func_symbol.name, func_typ)
+            .with_location(self.codegen_span_option(span.cloned()))
+    }
+
+    /// Generate a reified goto expression that references the
+    /// function identified by `instance`. The reification will remove
+    /// the first argument `self` because this closure does not
+    /// capture variables rustc optimizes the self input.
+    ///
+    /// This should not be used where Rust expects a "function item" (See `codegen_fn_item`)
+    pub fn codegen_no_self_closure_reified_to_fn_ptr(
+	&mut self, instance: Instance<'tcx>, span: Option<&Span>
+    ) -> Expr {
+        let (func_symbol, func_typ) = self.codegen_func_symbol(instance, true);
         Expr::symbol_expression(func_symbol.name, func_typ)
             .with_location(self.codegen_span_option(span.cloned()))
     }
@@ -769,7 +783,7 @@ impl<'tcx> GotocCtx<'tcx> {
     /// This is the Rust "function item". See <https://doc.rust-lang.org/reference/types/function-item.html>
     /// This is not the function pointer, for that use `codegen_func_expr`.
     fn codegen_fn_item(&mut self, instance: Instance<'tcx>, span: Option<&Span>) -> Expr {
-        let (func_symbol, _) = self.codegen_func_symbol(instance);
+        let (func_symbol, _) = self.codegen_func_symbol(instance, true);
         let mangled_name = func_symbol.name;
         let fn_item_struct_ty = self.codegen_fndef_type(instance);
         // This zero-sized object that a function name refers to in Rust is globally unique, so we create such a global object.

@@ -659,15 +659,19 @@ impl<'tcx> GotocCtx<'tcx> {
                 _ => unreachable!(),
             },
             PointerCast::UnsafeFnPointer => self.codegen_operand(o),
-            PointerCast::ClosureFnPointer(_) => {
-                let dest_typ = self.codegen_ty(t);
-                self.codegen_unimplemented_expr(
-                    "PointerCast::ClosureFnPointer",
-                    dest_typ,
-                    loc,
-                    "https://github.com/model-checking/kani/issues/274",
-                )
-            }
+            PointerCast::ClosureFnPointer(_) =>
+		// panic!("{:?}", self.operand_ty(o).kind()),
+		match self.operand_ty(o).kind() {
+                ty::Closure(def_id, substs) => {
+                    let instance =
+                        Instance::resolve(self.tcx, ty::ParamEnv::reveal_all(), *def_id, substs)
+                        .unwrap()
+			.unwrap();
+                    self.codegen_no_self_closure_reified_to_fn_ptr(instance, None)
+			.address_of()
+                }
+                _ => unreachable!(),
+            },
             PointerCast::MutToConstPointer => self.codegen_operand(o),
             PointerCast::ArrayToPointer => {
                 // TODO: I am not sure whether it is correct or not.
