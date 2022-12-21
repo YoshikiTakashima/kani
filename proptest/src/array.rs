@@ -24,9 +24,11 @@
 //! General implementations are available for sizes 1 through 32.
 
 use core::marker::PhantomData;
+use core::convert::TryInto;
 
 use crate::strategy::*;
 use crate::test_runner::*;
+use crate::std_facade::Vec;
 
 /// A `Strategy` which generates fixed-size arrays containing values drawn from
 /// an inner strategy.
@@ -138,7 +140,17 @@ macro_rules! small_array {
             type Value = [T::Value;$n];
 
             fn current(&self) -> [T::Value;$n] {
-                [$(self.tree[$ix].current(),)*]
+                let mut values = Vec::new();
+                for i in 0..200 {
+                    if let Some(vt) = self.tree.get(i) {
+                        values.push(vt.current());
+                    } else {
+                        break;
+                    }
+                }
+                values
+                    .try_into()
+                    .unwrap()
             }
 
             fn simplify(&mut self) -> bool {
