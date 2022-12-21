@@ -87,5 +87,5 @@ version = "0.8"
 default-features = false
 features = ["alloc"]
 
-#[target.'cfg(not(kani))'.dependencies]
-#kani = { path = "../kani/library/kani" }
+[target.'cfg(not(kani))'.dependencies]
+kani = { path = "../kani/library/kani" }
