@@ -739,7 +739,7 @@ macro_rules! prop_assert {
     };
 
     ($cond:expr, $($fmt:tt)*) => {
-        assert!($cond, $($fmt)*);
+        std::assert!($cond, $($fmt)*);
     };
 }
 
