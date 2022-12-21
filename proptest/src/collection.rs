@@ -54,7 +54,7 @@ pub fn size_range(from: impl Into<SizeRange>) -> SizeRange {
 impl Default for SizeRange {
     /// Constructs a `SizeRange` equivalent to `size_range(0..100)`.
     fn default() -> Self {
-        size_range(0..100)
+        size_range(0..3)
     }
 }
 
@@ -213,9 +213,9 @@ pub struct VecStrategy<T: Strategy> {
 /// strategy, you can instead make a `Vec` of strategies (boxed if necessary).
 pub fn vec<T: Strategy>(
     element: T,
-    size: impl Into<SizeRange>,
+    _size: impl Into<SizeRange>,
 ) -> VecStrategy<T> {
-    let size = size.into();
+    let size = SizeRange::default();
     size.assert_nonempty();
     VecStrategy { element, size }
 }
